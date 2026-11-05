@@ -160,42 +160,7 @@
   </div>
 </section>
 
-    <div class="editor-actions">\
-      <button class="button button-quiet" id="benchmark-query" disabled>
-        <i class="fa-solid fa-stopwatch"></i> Benchmark
-      </button>
-      <button class="button button-quiet" id="explore-relationships" disabled>
-        <i class="fa-solid fa-share-nodes"></i> Relationships
-      </button>
-      <button class="button button-quiet" id="query-history-toggle"
-        type="button" aria-expanded="false">
-        <i class="fa-solid fa-clock-rotate-left"></i>
-        History
-        <span id="query-history-count">0</span>
-      </button>
-
-      <button class="button button-quiet" id="explain-query" disabled>
-        <i class="fa-solid fa-diagram-project"></i> Explain plan
-      </button>
-
-      <button class="button button-quiet" id="advise-indexes" disabled>
-        <i class="fa-solid fa-wand-magic-sparkles"></i> Index advisor
-      </button>
-
-      <button class="button button-primary" id="execute-query" disabled>
-        <i class="fa-solid fa-play"></i> Run query
-        <kbd>Ctrl ↵</kbd>
-      </button>
-    </div>
-  </div>
-
-  <div id="sqlQueryContainer" class="editor-host"></div>
-
-  <div class="editor-footer">
-    <span><i class="fa-regular fa-keyboard"></i> SQL</span>
-    <span id="editor-hint">Open a database to enable the editor</span>
-  </div>
-</section>
+    
 
 <section class="panel query-history-panel" id="query-history-panel" hidden>
   <div class="results-heading">
