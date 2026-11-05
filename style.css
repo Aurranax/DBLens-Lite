@@ -203,3 +203,17 @@ body.light-mode .empty-state strong { color: #384256; }
 .schema-empty { margin: 0; padding: 15px 12px; color: var(--muted); font-size: 10px; }
 .schema-footnote { margin: 0; color: var(--faint); font-size: 9px; line-height: 1.6; }
 body.light-mode .schema-section-heading { background: #f4f6fa; }
+.index-advisor{padding:14px}
+.advisor-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:2px 0 13px}
+.advisor-header strong{color:var(--text);font-size:13px}
+.advisor-header p{margin:5px 0 0;color:var(--muted);font-size:10px;line-height:1.5}
+.advisor-badge{padding:5px 8px;border:1px solid var(--border);border-radius:5px;color:var(--accent);font:9px var(--mono)}
+.advisor-card{margin:0 0 10px;padding:12px;border:1px solid var(--border);border-radius:7px;background:var(--surface)}
+.advisor-card-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:7px}
+.advisor-card-top strong{font:11px var(--mono);overflow-wrap:anywhere}
+.advisor-card p{margin:6px 0 10px;color:var(--muted);font-size:10px;line-height:1.55}
+.advisor-card code{display:block;padding:9px 10px;border-radius:5px;background:#10141b;color:#a9d8c1;font:10px/1.55 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.advisor-tag{color:#e6b86b;font-size:8px;font-weight:700;letter-spacing:.7px}
+.advisor-note{margin-top:12px;padding:10px 11px;border:1px solid #e6b86b55;border-radius:6px;color:var(--muted);background:#e6b86b0b;font-size:9px;line-height:1.6}
+.advisor-empty{padding:18px 12px;color:var(--muted);font-size:10px;line-height:1.6}
+@media(max-width:700px){.advisor-header{flex-direction:column}}

@@ -78,8 +78,13 @@
             <p id="page-description">Connect a SQLite database to inspect its structure and run queries.</p>
           </div>
           <div class="page-heading-actions">
-            <button class="button button-secondary" id="load-sample" type="button"><i class="fa-solid fa-flask"></i> Demo queries</button>
-          </div>
+  <button class="button button-secondary" id="explore-relationships" type="button">
+    <i class="fa-solid fa-share-nodes"></i> Relationships
+  </button>
+  <button class="button button-secondary" id="load-sample" type="button">
+    <i class="fa-solid fa-flask"></i> Demo queries
+  </button>
+</div>
         </div>
 
         <div id="message" class="message" role="status" aria-live="polite"></div>
@@ -96,6 +101,7 @@
             <div class="panel-title"><span class="panel-icon"><i class="fa-solid fa-terminal"></i></span><div><h2>SQL editor</h2><p>Write and execute SQL against your local database.</p></div></div>
             <div class="editor-actions">
               <button class="button button-quiet" id="explain-query" disabled><i class="fa-solid fa-diagram-project"></i> Explain plan</button>
+              <button class="button button-quiet" id="advise-indexes" disabled><i class="fa-solid fa-wand-magic-sparkles"></i> Index advisor</button>
               <button class="button button-primary" id="execute-query" disabled><i class="fa-solid fa-play"></i> Run query <kbd>Ctrl ↵</kbd></button>
             </div>
           </div>
@@ -122,5 +128,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/sql/sql.min.js"></script>
   <script src="script.js"></script>
+  <script src="index-advisor.js"></script>
+  <script src="relationship-explorer.js"></script>
 </body>
 </html>
