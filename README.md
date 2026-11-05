@@ -1,74 +1,201 @@
-# SQLite-Viewer
+# DBLens
 
-A powerful, 100% client-side SQLite database viewer that runs entirely in your browser. No server, no installation, and no data ever leaves your computer.
+**A lightweight, browser-based SQLite development workspace for database exploration, schema inspection, query analysis, and performance benchmarking.**
 
-## ✨ Features
+DBLens is a client-side SQLite viewer and developer workspace built with HTML, CSS, vanilla JavaScript, and SQL.js/WebAssembly. It allows you to load SQLite databases directly in your browser, explore database structures, execute SQL queries, analyse query execution plans, and benchmark query performance without setting up a database server.
 
--   **🖥️ Purely Browser-Based:** Operates entirely on the client-side. Your data stays private.
--   **📂 Open Local `.db` Files:** Directly open and view SQLite database files from your computer.
--   **🔍 Browse Data & Schema:** Intuitively navigate through tables and view their structure.
--   **✏️ Powerful Query Editor:** Execute custom SQL queries with syntax highlighting.
--   **💾 Works Offline:** Fully functional without an internet connection after the initial page load.
--   **🚀 Powered by WebAssembly:** Leverages the power of SQLite compiled to WebAssembly for native-like performance.
--   **📱 Responsive Design:** Use it on your desktop, tablet, or mobile device.
+> **Project status:** Early Development · Preview 0.1.0
+> **Repository:** [Aurranax/SQLite-Viewer](https://github.com/Aurranax/SQLite-Viewer)
+> **Development branch:** `feature/dblens`
 
-## 🚀 How to Use
+## Features
 
-1.  **Navigate** to the [live demo](https://bjmdevelopers.github.io/SQLite-Viewer/).
-2.  **Click "Open Database"** and select a SQLite (`.db`, `.sqlite`, `.sqlite3`) file from your local machine.
-3.  **Explore your data:**
-    * Click on a table name in the sidebar to view its contents.
-    * Switch to the "Schema" tab to inspect the table's structure.
-4.  **Run Custom Queries:**
-    * Go to the "Query" tab.
-    * Write your SQL query in the editor.
-    * Click "Run Query" to see the results.
+| Feature                   | Description                                                                                                     |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **SQL Editor**            | Write and execute SQL queries with syntax highlighting through CodeMirror.                                      |
+| **Database Explorer**     | Browse tables, views, and indexes in the loaded database.                                                       |
+| **Schema Inspector**      | Inspect columns, declared types, primary keys, default values, foreign keys, and indexes using SQLite metadata. |
+| **Query Plan Analyser**   | Visualise `EXPLAIN QUERY PLAN` output, including table scans, searches, index usage, and query-plan structure.  |
+| **Index Advisor**         | Suggest potential indexes using query-plan and schema information. Recommendations do not modify the database.  |
+| **Relationship Explorer** | Visualise relationships declared through SQLite foreign-key constraints.                                        |
+| **Query History**         | Store up to 100 recent query executions locally using browser `localStorage`.                                   |
+| **Query Benchmark**       | Compare repeated query execution times using warm-up and measured runs.                                         |
+| **Result Export**         | Export query results as CSV or JSON.                                                                            |
+| **Themes**                | Switch between dark and light themes.                                                                           |
 
-## 🛠️ Development
+## Getting Started
 
-Interested in contributing or running the project locally?
+### Prerequisites
 
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/bjmdevelopers/SQLite-Viewer.git](https://github.com/bjmdevelopers/SQLite-Viewer.git)
-    ```
-2.  **Navigate to the project directory:**
-    ```bash
-    cd SQLite-Viewer
-    ```
-3.  **Open `index.html`** in your favorite web browser. That's it!
+* Windows 11, macOS, or Linux
+* Git
+* Python 3
 
-## 💻 Technologies Used
+DBLens is a static browser application. No database server, backend, or framework installation is required.
 
-* **SQLite compiled to WebAssembly (WASM):** This is the core of the application, allowing us to run the SQLite engine directly in the browser with near-native speed.
-* **Vanilla JavaScript:** No frameworks were used, keeping the application lightweight and fast. All interactions and logic are handled with plain JavaScript.
-* **HTML5 & CSS3:** For the application's structure and styling, including the use of Flexbox and Grid for a responsive layout.
+### Run Locally
 
-## 🔮 Future Improvements
+**1. Clone the repository:**
 
-We have a lot of exciting features planned:
+```powershell
+git clone https://github.com/Aurranax/SQLite-Viewer.git
+cd SQLite-Viewer
+```
 
--   **[ ] ✍️ Table Data Editing:** Allow users to directly edit, add, and delete rows.
--   **[ ] 📤 Data Export/Import:** Support for exporting tables or query results to formats like CSV and JSON.
--   **[ ] 📊 Data Visualization:** Basic charting capabilities for query results.
+**2. Switch to the development branch:**
 
-Have an idea? Feel free to [open an issue](https://github.com/bjmdevelopers/SQLite-Viewer/issues)!
+```powershell
+git checkout feature/dblens
+```
 
-## Acknowledgements
+**3. Start a local HTTP server:**
 
-This project was made possible by these incredible open-source technologies:
+```powershell
+py -m http.server 8000
+```
 
-- **[sql.js](https://github.com/sql-js/sql.js)** (MIT License) - SQLite compiled to WebAssembly, created by [Alon Zakai (@kripken)](https://github.com/kripken) and contributors
-- **[SQLite](https://www.sqlite.org/)** (Public Domain) - Embedded database engine developed by [D. Richard Hipp](https://www.sqlite.org/) and team
-- **[Emscripten](https://emscripten.org/)** (MIT License) - C/C++ to WebAssembly compiler
-- WebAssembly - For enabling native-speed execution in browsers
+If the `py` command is unavailable, use:
 
-## 🤝 Contributing
+```powershell
+python -m http.server 8000
+```
 
-Contributions are welcome! If you'd like to help improve SQLite-Viewer, please fork the repository and submit a pull request. For major changes, please open an issue first to discuss what you would like to change.
+**4. Open DBLens in your browser:**
 
-## 📜 License
+http://localhost:8000
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Keep the terminal running while using the application. Press `Ctrl+C` to stop the server.
 
-MIT © [bjmdevelopers](https://github.com/bjmdevelopers)
+> **Note:** Serve the project through HTTP rather than opening `index.html` directly. This allows the SQL.js WebAssembly resources to load correctly.
+
+## Using DBLens
+
+1. Open DBLens in your browser.
+2. Load a SQLite database file using the database-loading control.
+3. Select a table in the Database Explorer to inspect its contents.
+4. Use the SQL Editor to write and execute queries.
+5. Open the Schema Inspector to examine table structures, columns, and indexes.
+6. Use the Query Plan Analyser to inspect SQLite's `EXPLAIN QUERY PLAN` output.
+7. Explore declared foreign-key relationships using the Relationship Explorer.
+8. Benchmark queries and compare execution times.
+9. Export query results as CSV or JSON.
+
+**Tip:** Always inspect the actual database schema before writing queries. For example:
+
+```sql
+PRAGMA table_info("customers");
+```
+
+Do not assume that a table contains a particular column simply because it is commonly found in other databases.
+
+## How It Works
+
+DBLens runs in the browser using SQL.js, which provides SQLite compiled to WebAssembly.
+
+The general workflow is:
+
+1. The user selects a SQLite database file.
+2. The browser reads the selected file.
+3. SQL.js loads the database into browser memory.
+4. SQL queries and SQLite metadata operations execute locally.
+5. Results, schema information, and query analysis are displayed in the interface.
+
+The selected database is not uploaded to a DBLens-hosted backend. Database processing takes place locally in the browser.
+
+### Technology Stack
+
+| Technology                      | Purpose                                   |
+| ------------------------------- | ----------------------------------------- |
+| **HTML5**                       | Application structure                     |
+| **CSS3**                        | Interface styling and themes              |
+| **Vanilla JavaScript**          | Application logic and interactions        |
+| **SQL.js / SQLite WebAssembly** | SQLite database processing in the browser |
+| **CodeMirror 5**                | SQL editor and syntax highlighting        |
+| **Browser localStorage**        | Local query-history persistence           |
+
+The project intentionally uses a lightweight frontend without introducing a large application framework.
+
+## Project Structure
+
+```text
+SQLite-Viewer/
+│
+├── index.html          # Application interface
+├── style.css           # Styling and themes
+├── script.js           # Application logic and features
+│
+├── sql.js              # SQL.js library
+├── sql-wasm.wasm       # SQLite WebAssembly module
+│
+├── README.md           # Project documentation
+└── LICENSE             # License information
+```
+
+## Technical Notes and Limitations
+
+* **Database size:** The current preview rejects database files larger than 150 MB.
+* **Memory usage:** Database contents are loaded into browser memory. Available memory and browser performance affect practical database size.
+* **Query History:** Stores up to 100 recent executions in browser `localStorage`. History is local to the browser.
+* **Relationship Explorer:** Displays relationships represented by declared SQLite foreign-key constraints. It does not infer relationships from similar column names.
+* **Index Advisor:** Provides recommendations only. It does not automatically create, modify, or apply indexes.
+* **Query Benchmark:** Results depend on the user's hardware, browser, database state, and runtime conditions. Measurements should be treated as indicative rather than universal performance guarantees.
+* **Query Plan Analyser:** Uses SQLite's `EXPLAIN QUERY PLAN` output to analyse execution plans. It does not execute the original query simply to display its plan.
+* **External dependencies:** Some interface dependencies are loaded from external CDNs. An internet connection may therefore be required to load certain resources.
+
+## Development
+
+DBLens is actively developed on the `feature/dblens` branch.
+
+For local development:
+
+1. Clone the repository and switch to the development branch.
+2. Start the local HTTP server.
+3. Edit the relevant HTML, CSS, or JavaScript files.
+4. Refresh the browser to test changes.
+5. Verify that the affected workflows work correctly before committing.
+
+Before committing, review the working tree:
+
+```powershell
+git status
+git diff --check
+git diff
+```
+
+Test changes in the browser. A successful JavaScript syntax check alone does not guarantee that a feature works correctly from the user's perspective.
+
+## Project Background and Attribution
+
+DBLens is a redesigned and extended version of the upstream [SQLite-Viewer project by bjmdevelopers](https://github.com/bjmdevelopers/SQLite-Viewer).
+
+The DBLens interface and additional developer tools are being developed in the `feature/dblens` branch of this repository.
+
+The upstream project and its contributors should receive appropriate attribution in accordance with the existing license and notices.
+
+See the repository's `LICENSE` file for applicable license terms. Preserve upstream copyright and license notices when modifying or redistributing source files.
+
+## Roadmap
+
+The current focus is on improving the stability, usability, and reliability of the existing implementation.
+
+Planned improvements include:
+
+* Capturing genuine screenshots of the running application.
+* Reviewing error handling and browser compatibility.
+* Improving accessibility and interface consistency.
+* Testing SQL edge cases and database metadata handling.
+* Adding automated tests for schema inspection, identifier quoting, empty databases, and other edge cases.
+* Considering a GitHub Pages deployment after the local application is stable.
+
+## Contributing
+
+Issues, bug reports, and improvement suggestions are welcome.
+
+When reporting an issue, include:
+
+* Expected behaviour.
+* Actual behaviour.
+* Steps to reproduce the issue.
+* Browser and operating-system details, where relevant.
+
+For feature contributions, update the documentation and test the affected workflows before submitting changes.
