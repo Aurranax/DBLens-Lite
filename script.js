@@ -217,13 +217,174 @@ function runQuery(queryOverride) {
 function explainQuery() {
   if (!db) return;
   const query = editor.getValue().trim().replace(/;+\s*$/, '');
-  if (!query) return;
-  if (query.includes(';')) {
+  if (!query) {
+    showMessage('Enter a SELECT or other query to analyse.', 'error');
+    return;
+  }
+  // SQLite's EXPLAIN QUERY PLAN accepts one statement. Avoid accidentally
+  // treating semicolons inside quoted strings as statement separators.
+  if (hasMultipleStatements(query)) {
     showMessage('Explain plan accepts one SQL statement at a time.', 'error');
     return;
   }
-  const explainSql = `EXPLAIN QUERY PLAN ${query};`;
-  runQuery(explainSql);
+
+  const started = performance.now();
+  explainQueryBtn.disabled = true;
+  queryStatusElem.textContent = 'Analysing query plan…';
+  resultsElem.innerHTML = '<div class="loading-state"><span class="spinner"></span>Building query plan</div>';
+
+  window.setTimeout(() => {
+    try {
+      const result = db.exec(`EXPLAIN QUERY PLAN ${query};`);
+      if (!result.length || !result[0].values.length) {
+        renderEmptyResult('SQLite did not return a query plan for this statement.');
+        queryStatusElem.textContent = 'No plan returned';
+        return;
+      }
+      const plan = result[0];
+      const indexes = Object.fromEntries(plan.columns.map((name, i) => [String(name).toLowerCase(), i]));
+      const idIndex = indexes.id ?? 0;
+      const parentIndex = indexes.parent ?? 1;
+      const detailIndex = indexes.detail ?? 3;
+      const rows = plan.values.map((row) => ({
+        id: Number(row[idIndex]),
+        parent: Number(row[parentIndex]),
+        detail: String(row[detailIndex] ?? '')
+      }));
+      renderQueryPlan(rows);
+      const elapsed = (performance.now() - started).toFixed(2);
+      const scans = rows.filter((row) => /\bSCAN\b/i.test(row.detail)).length;
+      const searches = rows.filter((row) => /\bSEARCH\b/i.test(row.detail)).length;
+      queryStatusElem.textContent = `${rows.length} plan step${rows.length === 1 ? '' : 's'} · ${searches} search${searches === 1 ? '' : 'es'} · ${scans} scan${scans === 1 ? '' : 's'} · ${elapsed} ms`;
+      setExportEnabled(false);
+      showMessage('Query plan generated. This analyses the strategy; it does not execute the original query.', 'success', true);
+    } catch (error) {
+      renderError(error.message);
+      queryStatusElem.textContent = 'Plan analysis failed';
+      showMessage(error.message, 'error');
+    } finally {
+      explainQueryBtn.disabled = false;
+    }
+  }, 10);
+}
+
+function hasMultipleStatements(sql) {
+  // SQLite itself is the final authority. This lightweight check catches
+  // ordinary multi-statement input without rejecting semicolons in strings.
+  let quote = null;
+  for (let i = 0; i < sql.length; i++) {
+    const ch = sql[i];
+    if (quote) {
+      if (ch === quote && sql[i + 1] === quote) { i++; continue; }
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === "'" || ch === '"' || ch === '`') { quote = ch; continue; }
+    if (ch === ';' && sql.slice(i + 1).trim()) return true;
+  }
+  return false;
+}
+
+function renderQueryPlan(rows) {
+  const scans = rows.filter((row) => /\bSCAN\b/i.test(row.detail));
+  const searches = rows.filter((row) => /\bSEARCH\b/i.test(row.detail));
+  const indexed = rows.filter((row) => /\bUSING (?:COVERING )?INDEX\b/i.test(row.detail));
+  const summary = document.createElement('div');
+  summary.className = 'plan-summary';
+
+  const metrics = [
+    ['PLAN STEPS', rows.length],
+    ['SEARCHES', searches.length],
+    ['TABLE SCANS', scans.length],
+    ['INDEX USE', indexed.length]
+  ];
+  metrics.forEach(([label, value]) => {
+    const card = document.createElement('div');
+    card.className = 'plan-metric';
+    const caption = document.createElement('span');
+    caption.textContent = label;
+    const number = document.createElement('strong');
+    number.textContent = value;
+    card.append(caption, number);
+    summary.appendChild(card);
+  });
+
+  const note = document.createElement('div');
+  note.className = 'plan-note';
+  if (indexed.length) {
+    note.classList.add('plan-good');
+    note.textContent = 'Index detected: SQLite reports index-assisted lookup in this plan.';
+  } else if (scans.length) {
+    note.classList.add('plan-warn');
+    note.textContent = 'Table scan detected: SQLite may need to inspect rows without using an index for this operation.';
+  } else {
+    note.textContent = 'Review the steps below to understand how SQLite intends to execute this statement.';
+  }
+
+  const tree = document.createElement('div');
+  tree.className = 'plan-tree';
+  const byId = new Map(rows.map((row) => [row.id, { ...row, children: [] }]));
+  const roots = [];
+  rows.forEach((row) => {
+    const node = byId.get(row.id);
+    const parent = byId.get(row.parent);
+    if (parent && parent !== node) parent.children.push(node);
+    else roots.push(node);
+  });
+
+  const renderNode = (node, depth = 0) => {
+    const item = document.createElement('div');
+    item.className = 'plan-node';
+    item.style.setProperty('--depth', Math.min(depth, 8));
+    const detail = node.detail;
+    const kind = /\bSEARCH\b/i.test(detail) ? 'search' :
+      /\bSCAN\b/i.test(detail) ? 'scan' :
+      /\bUSE TEMP B-TREE\b/i.test(detail) ? 'temp' : 'other';
+    const icon = document.createElement('span');
+    icon.className = `plan-node-icon ${kind}`;
+    icon.innerHTML = kind === 'search' ? '<i class="fa-solid fa-magnifying-glass"></i>' :
+      kind === 'scan' ? '<i class="fa-solid fa-table"></i>' :
+      kind === 'temp' ? '<i class="fa-solid fa-box"></i>' : '<i class="fa-solid fa-code-branch"></i>';
+    const content = document.createElement('div');
+    content.className = 'plan-node-content';
+    const label = document.createElement('strong');
+    label.textContent = kind === 'search' ? 'SEARCH' : kind === 'scan' ? 'SCAN' : kind === 'temp' ? 'TEMPORARY STRUCTURE' : 'PLAN OPERATION';
+    const description = document.createElement('code');
+    description.textContent = detail;
+    content.append(label, description);
+    item.append(icon, content);
+    tree.appendChild(item);
+    node.children.forEach((child) => renderNode(child, depth + 1));
+  };
+  roots.forEach((root) => renderNode(root));
+
+  const raw = document.createElement('details');
+  raw.className = 'plan-raw';
+  const rawSummary = document.createElement('summary');
+  rawSummary.textContent = 'Raw SQLite plan rows';
+  const rawTable = document.createElement('table');
+  rawTable.className = 'data-table';
+  const head = document.createElement('tr');
+  ['ID', 'PARENT', 'DETAIL'].forEach((name) => {
+    const th = document.createElement('th');
+    th.textContent = name;
+    head.appendChild(th);
+  });
+  const thead = document.createElement('thead');
+  thead.appendChild(head);
+  const tbody = document.createElement('tbody');
+  rows.forEach((row) => {
+    const tr = document.createElement('tr');
+    [row.id, row.parent, row.detail].forEach((value) => {
+      const td = document.createElement('td');
+      td.textContent = value;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  rawTable.append(thead, tbody);
+  raw.append(rawSummary, rawTable);
+  resultsElem.replaceChildren(summary, note, tree, raw);
 }
 
 function renderResults(columns, values) {

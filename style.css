@@ -159,3 +159,29 @@ body.light-mode .empty-state strong { color: #384256; }
   .editor-actions .button { flex: 1; }
   .main-footer { gap: 10px; flex-direction: column; }
 }
+
+
+/* Query-plan visualizer */
+.plan-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; padding: 13px; }
+.plan-metric { display: flex; flex-direction: column; gap: 7px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); }
+.plan-metric span { color: var(--muted); font-size: 8px; font-weight: 700; letter-spacing: .8px; }
+.plan-metric strong { color: var(--text); font: 500 20px var(--mono); }
+.plan-note { margin: 0 13px 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+.plan-note.plan-good { color: var(--green); border-color: #5bc69a55; background: #5bc69a0b; }
+.plan-note.plan-warn { color: #e6b86b; border-color: #e6b86b55; background: #e6b86b0b; }
+.plan-tree { padding: 3px 13px 14px; }
+.plan-node { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 7px; margin-left: calc(var(--depth) * 19px); padding: 10px 11px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); }
+.plan-node-icon { display: grid; place-items: center; width: 25px; height: 25px; flex: 0 0 auto; border-radius: 6px; color: var(--muted); background: var(--surface-hover); font-size: 10px; }
+.plan-node-icon.search { color: var(--green); background: #5bc69a16; }
+.plan-node-icon.scan { color: #e6b86b; background: #e6b86b16; }
+.plan-node-icon.temp { color: var(--accent); background: #8b9cff16; }
+.plan-node-content { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.plan-node-content strong { color: var(--muted); font-size: 8px; letter-spacing: .8px; }
+.plan-node-content code { color: var(--text); font: 10px/1.5 var(--mono); white-space: normal; overflow-wrap: anywhere; }
+.plan-raw { margin: 0 13px 13px; border-top: 1px solid var(--border); padding-top: 10px; }
+.plan-raw summary { padding: 0 0 10px; color: var(--muted); cursor: pointer; font-size: 10px; }
+.plan-raw .data-table { margin-bottom: 8px; }
+@media (max-width: 700px) {
+  .plan-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .plan-node { margin-left: calc(var(--depth) * 10px); }
+}
