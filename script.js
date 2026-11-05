@@ -100,9 +100,16 @@ async function handleFileSelect(event) {
 
 function setEditorEnabled(enabled) {
   editor.setOption('readOnly', !enabled);
+
   executeQueryBtn.disabled = !enabled;
   explainQueryBtn.disabled = !enabled;
-  $('editor-hint').textContent = enabled ? 'Ctrl + Enter to run' : 'Open a database to enable the editor';
+
+  $('explore-relationships').disabled = !enabled;
+  $('advise-indexes').disabled = !enabled;
+
+  $('editor-hint').textContent = enabled
+    ? 'Ctrl + Enter to run'
+    : 'Open a database to enable the editor';
 }
 
 function refreshSchema() {
@@ -336,45 +343,108 @@ function runQuery(queryOverride) {
     showMessage('Open a database before executing SQL.', 'error');
     return;
   }
+
   const query = (queryOverride || editor.getValue()).trim();
+
   if (!query) {
     showMessage('Enter a SQL query first.', 'error');
     return;
   }
 
   lastQuery = query;
+
   const started = performance.now();
+  const timestamp = new Date().toISOString();
+
+  let querySucceeded = false;
+  let queryError = '';
+
   queryStatusElem.textContent = 'Executing…';
-  resultsElem.innerHTML = '<div class="loading-state"><span class="spinner"></span>Executing query</div>';
+  resultsElem.innerHTML =
+    '<div class="loading-state"><span class="spinner"></span>Executing query</div>';
+
   executeQueryBtn.disabled = true;
 
-  // Yield once so the UI can display the running state before SQL.js executes.
+  // Yield once so the UI can display the running state.
   window.setTimeout(() => {
     try {
       const resultSets = db.exec(query);
-      const elapsed = (performance.now() - started).toFixed(2);
+
+      const elapsed = performance.now() - started;
+      const elapsedText = elapsed.toFixed(2);
+
       if (!resultSets.length) {
         lastResult = { columns: [], values: [] };
-        renderEmptyResult('Statement executed successfully. No rows were returned.');
-        queryStatusElem.textContent = `Completed in ${elapsed} ms`;
+
+        renderEmptyResult(
+          'Statement executed successfully. No rows were returned.'
+        );
+
+        queryStatusElem.textContent =
+          `Completed in ${elapsedText} ms`;
+
         setExportEnabled(false);
+
       } else {
         const first = resultSets[0];
-        lastResult = { columns: first.columns, values: first.values };
+
+        lastResult = {
+          columns: first.columns,
+          values: first.values
+        };
+
         renderResults(first.columns, first.values);
+
         const rowCount = first.values.length;
-        queryStatusElem.textContent = `${rowCount.toLocaleString()} row${rowCount === 1 ? '' : 's'} · ${elapsed} ms`;
+
+        queryStatusElem.textContent =
+          `${rowCount.toLocaleString()} row${rowCount === 1 ? '' : 's'} · ${elapsedText} ms`;
+
         setExportEnabled(true);
       }
-      if (/^\s*(CREATE|DROP|ALTER|REINDEX)\b/i.test(query)) refreshSchema();
+
+      if (/^\s*(CREATE|DROP|ALTER|REINDEX)\b/i.test(query)) {
+        refreshSchema();
+      }
+
+      querySucceeded = true;
+
       showMessage('Query completed.', 'success', true);
+
     } catch (error) {
       lastResult = null;
+      queryError = error.message;
+
       renderError(error.message);
+
       queryStatusElem.textContent = 'Query failed';
+
       setExportEnabled(false);
+
       showMessage(error.message, 'error');
+
     } finally {
+      const duration = performance.now() - started;
+
+      // Record this execution in Query History.
+      if (
+        window.DBLensQueryHistory &&
+        typeof window.DBLensQueryHistory.record === 'function'
+      ) {
+        try {
+          window.DBLensQueryHistory.record({
+            query,
+            database: currentFileName,
+            timestamp,
+            duration,
+            success: querySucceeded,
+            error: queryError
+          });
+        } catch (historyError) {
+          console.error('Query history recording failed:', historyError);
+        }
+      }
+
       executeQueryBtn.disabled = false;
     }
   }, 15);

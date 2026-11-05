@@ -78,13 +78,8 @@
             <p id="page-description">Connect a SQLite database to inspect its structure and run queries.</p>
           </div>
           <div class="page-heading-actions">
-  <button class="button button-secondary" id="explore-relationships" type="button">
-    <i class="fa-solid fa-share-nodes"></i> Relationships
-  </button>
-  <button class="button button-secondary" id="load-sample" type="button">
-    <i class="fa-solid fa-flask"></i> Demo queries
-  </button>
-</div>
+            <button class="button button-secondary" id="load-sample" type="button"><i class="fa-solid fa-flask"></i> Demo queries</button>
+          </div>
         </div>
 
         <div id="message" class="message" role="status" aria-live="polite"></div>
@@ -97,17 +92,78 @@
         </section>
 
         <section class="panel editor-panel">
-          <div class="panel-heading">
-            <div class="panel-title"><span class="panel-icon"><i class="fa-solid fa-terminal"></i></span><div><h2>SQL editor</h2><p>Write and execute SQL against your local database.</p></div></div>
-            <div class="editor-actions">
-              <button class="button button-quiet" id="explain-query" disabled><i class="fa-solid fa-diagram-project"></i> Explain plan</button>
-              <button class="button button-quiet" id="advise-indexes" disabled><i class="fa-solid fa-wand-magic-sparkles"></i> Index advisor</button>
-              <button class="button button-primary" id="execute-query" disabled><i class="fa-solid fa-play"></i> Run query <kbd>Ctrl ↵</kbd></button>
-            </div>
-          </div>
-          <div id="sqlQueryContainer" class="editor-host"></div>
-          <div class="editor-footer"><span><i class="fa-regular fa-keyboard"></i> SQL</span><span id="editor-hint">Open a database to enable the editor</span></div>
-        </section>
+  <div class="panel-heading">
+    <div class="panel-title">
+      <span class="panel-icon">
+        <i class="fa-solid fa-terminal"></i>
+      </span>
+      <div>
+        <h2>SQL editor</h2>
+        <p>Write and execute SQL against your local database.</p>
+      </div>
+    </div>
+
+    <div class="editor-actions">
+      <button class="button button-quiet" id="explore-relationships" disabled>
+        <i class="fa-solid fa-share-nodes"></i> Relationships
+      </button>
+      <button class="button button-quiet" id="query-history-toggle"
+        type="button" aria-expanded="false">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        History
+        <span id="query-history-count">0</span>
+      </button>
+
+      <button class="button button-quiet" id="explain-query" disabled>
+        <i class="fa-solid fa-diagram-project"></i> Explain plan
+      </button>
+
+      <button class="button button-quiet" id="advise-indexes" disabled>
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Index advisor
+      </button>
+
+      <button class="button button-primary" id="execute-query" disabled>
+        <i class="fa-solid fa-play"></i> Run query
+        <kbd>Ctrl ↵</kbd>
+      </button>
+    </div>
+  </div>
+
+  <div id="sqlQueryContainer" class="editor-host"></div>
+
+  <div class="editor-footer">
+    <span><i class="fa-regular fa-keyboard"></i> SQL</span>
+    <span id="editor-hint">Open a database to enable the editor</span>
+  </div>
+</section>
+
+<section class="panel query-history-panel" id="query-history-panel" hidden>
+  <div class="results-heading">
+    <div class="panel-title">
+      <span class="panel-icon">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+      </span>
+      <div>
+        <h2>Query History</h2>
+        <p>Previously executed SQL statements and their execution details.</p>
+      </div>
+    </div>
+
+    <div class="results-actions">
+      <button class="button button-quiet" id="query-history-clear"
+        type="button">
+        <i class="fa-solid fa-trash"></i> Clear history
+      </button>
+
+      <button class="button button-quiet" id="query-history-close"
+        type="button">
+        <i class="fa-solid fa-xmark"></i> Close
+      </button>
+    </div>
+  </div>
+
+  <div id="query-history-list" class="query-history-list"></div>
+</section>
 
         <section class="panel results-panel">
           <div class="results-heading">
@@ -130,5 +186,6 @@
   <script src="script.js"></script>
   <script src="index-advisor.js"></script>
   <script src="relationship-explorer.js"></script>
+  <script src="query-history.js"></script>
 </body>
 </html>
