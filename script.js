@@ -106,6 +106,7 @@ function setEditorEnabled(enabled) {
 
   $('explore-relationships').disabled = !enabled;
   $('advise-indexes').disabled = !enabled;
+  $('benchmark-query').disabled = !enabled;
 
   $('editor-hint').textContent = enabled
     ? 'Ctrl + Enter to run'

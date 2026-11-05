@@ -91,19 +91,79 @@
           <article class="stat-card"><div class="stat-top"><span>ENGINE</span><i class="fa-solid fa-microchip"></i></div><strong class="engine-value">SQLite</strong><small>Powered by SQL.js / WebAssembly</small></article>
         </section>
 
-        <section class="panel editor-panel">
-  <div class="panel-heading">
+       <section class="panel editor-panel">
+  <div class="panel-heading editor-heading">
     <div class="panel-title">
       <span class="panel-icon">
         <i class="fa-solid fa-terminal"></i>
       </span>
       <div>
         <h2>SQL editor</h2>
-        <p>Write and execute SQL against your local database.</p>
+        <p>Write SQL and inspect your database locally.</p>
       </div>
     </div>
 
-    <div class="editor-actions">
+    <div class="editor-toolbar">
+      <details class="editor-tools">
+        <summary class="button button-quiet">
+          <i class="fa-solid fa-sliders"></i>
+          Tools
+          <i class="fa-solid fa-chevron-down tools-chevron"></i>
+        </summary>
+
+        <div class="editor-tools-menu">
+
+          <button class="tool-menu-item" id="explore-relationships" disabled>
+            <i class="fa-solid fa-share-nodes"></i>
+            <span>Relationships</span>
+          </button>
+
+          <button class="tool-menu-item" id="query-history-toggle"
+            type="button" aria-expanded="false">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Query History</span>
+            <span class="tool-count" id="query-history-count">0</span>
+          </button>
+
+          <button class="tool-menu-item" id="explain-query" disabled>
+            <i class="fa-solid fa-diagram-project"></i>
+            <span>Explain Plan</span>
+          </button>
+
+          <button class="tool-menu-item" id="advise-indexes" disabled>
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Index Advisor</span>
+          </button>
+
+          <button class="tool-menu-item" id="benchmark-query" disabled>
+            <i class="fa-solid fa-stopwatch"></i>
+            <span>Benchmark</span>
+          </button>
+
+        </div>
+      </details>
+
+      <button class="button button-primary editor-run-button"
+        id="execute-query" disabled>
+        <i class="fa-solid fa-play"></i>
+        Run query
+        <kbd>Ctrl ↵</kbd>
+      </button>
+    </div>
+  </div>
+
+  <div id="sqlQueryContainer" class="editor-host"></div>
+
+  <div class="editor-footer">
+    <span><i class="fa-regular fa-keyboard"></i> SQL</span>
+    <span id="editor-hint">Open a database to enable the editor</span>
+  </div>
+</section>
+
+    <div class="editor-actions">\
+      <button class="button button-quiet" id="benchmark-query" disabled>
+        <i class="fa-solid fa-stopwatch"></i> Benchmark
+      </button>
       <button class="button button-quiet" id="explore-relationships" disabled>
         <i class="fa-solid fa-share-nodes"></i> Relationships
       </button>
@@ -165,6 +225,49 @@
   <div id="query-history-list" class="query-history-list"></div>
 </section>
 
+<section class="panel benchmark-panel" id="benchmark-panel" hidden>
+  <div class="results-heading">
+    <div class="panel-title">
+      <span class="panel-icon">
+        <i class="fa-solid fa-stopwatch"></i>
+      </span>
+      <div>
+        <h2>Query Benchmark</h2>
+        <p>Measure repeated execution performance.</p>
+      </div>
+    </div>
+
+    <div class="results-actions">
+      <label class="benchmark-control">
+        Runs
+        <input
+          type="number"
+          id="benchmark-iterations"
+          min="2"
+          max="30"
+          value="10"
+        >
+      </label>
+
+      <button class="button button-primary" id="benchmark-run" type="button">
+        <i class="fa-solid fa-play"></i> Run benchmark
+      </button>
+
+      <button class="button button-quiet" id="benchmark-close" type="button">
+        <i class="fa-solid fa-xmark"></i> Close
+      </button>
+    </div>
+  </div>
+
+  <div class="benchmark-content">
+    <p id="benchmark-status" class="benchmark-status">
+      Select Benchmark to measure the current query.
+    </p>
+
+    <div id="benchmark-results"></div>
+  </div>
+</section>
+
         <section class="panel results-panel">
           <div class="results-heading">
             <div class="panel-title"><span class="panel-icon"><i class="fa-solid fa-table-cells"></i></span><div><h2 id="results-title">Results</h2><p id="query-status">Query output will appear here.</p></div></div>
@@ -187,5 +290,6 @@
   <script src="index-advisor.js"></script>
   <script src="relationship-explorer.js"></script>
   <script src="query-history.js"></script>
+  <script src="query-benchmark.js"></script>
 </body>
 </html>

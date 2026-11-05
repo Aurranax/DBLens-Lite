@@ -363,3 +363,243 @@ body.light-mode .schema-section-heading { background: #f4f6fa; }
     flex-direction: column;
   }
 }
+/* Query Benchmark */
+
+.benchmark-panel[hidden] {
+  display: none !important;
+}
+
+.benchmark-panel {
+  padding: 18px;
+}
+
+.benchmark-content {
+  padding: 12px 0 2px;
+}
+
+.benchmark-status {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.benchmark-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.benchmark-control input {
+  width: 65px;
+  padding: 7px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  outline: none;
+  background: var(--surface);
+  color: var(--text);
+  font: 10px var(--mono);
+}
+
+.benchmark-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.benchmark-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+}
+
+.benchmark-metric span {
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .7px;
+}
+
+.benchmark-metric strong {
+  color: var(--text);
+  font: 500 17px var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.benchmark-summary {
+  margin-top: 12px;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--accent);
+  background: var(--surface);
+  font: 10px var(--mono);
+}
+
+.benchmark-note {
+  margin: 11px 0 0;
+  color: var(--faint);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.benchmark-error {
+  padding: 13px;
+  border: 1px solid #ef858555;
+  border-radius: 6px;
+  color: #ef8585;
+  background: #ef858510;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .benchmark-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .benchmark-panel {
+    padding: 12px;
+  }
+
+  .benchmark-panel .results-actions {
+    flex-wrap: wrap;
+  }
+}
+/* Refined SQL Editor Toolbar */
+
+.editor-heading {
+  position: relative;
+  overflow: visible;
+  min-height: 76px;
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-left: auto;
+}
+
+.editor-tools {
+  position: relative;
+}
+
+.editor-tools summary {
+  list-style: none;
+  user-select: none;
+}
+
+.editor-tools summary::-webkit-details-marker {
+  display: none;
+}
+
+.tools-chevron {
+  margin-left: 3px;
+  font-size: 9px;
+  transition: transform .18s ease;
+}
+
+.editor-tools[open] .tools-chevron {
+  transform: rotate(180deg);
+}
+
+.editor-tools-menu {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  z-index: 100;
+  width: 215px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-raised);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, .28);
+  animation: tools-appear .14s ease;
+}
+
+@keyframes tools-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tool-menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 11px;
+  padding: 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-size: 10px;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+
+.tool-menu-item > i {
+  width: 15px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.tool-menu-item:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.tool-menu-item:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.tool-count {
+  margin-left: auto;
+  color: var(--accent);
+  font: 9px var(--mono);
+}
+
+.editor-run-button {
+  min-width: 112px;
+}
+
+.editor-run-button kbd {
+  margin-left: 3px;
+}
+
+@media (max-width: 700px) {
+  .editor-heading {
+    align-items: center !important;
+    flex-direction: row !important;
+  }
+
+  .editor-toolbar {
+    width: auto;
+    margin-left: auto;
+  }
+
+  .editor-run-button {
+    min-width: auto;
+  }
+
+  .editor-run-button kbd {
+    display: none;
+  }
+
+  .editor-tools-menu {
+    right: 0;
+    width: 205px;
+  }
+}
