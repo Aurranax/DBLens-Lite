@@ -158,11 +158,177 @@ function renderObjectList(list, names, type) {
     item.addEventListener('click', () => {
       document.querySelectorAll('.object-item.active').forEach((node) => node.classList.remove('active'));
       item.classList.add('active');
-      editor.setValue(`SELECT * FROM ${quoteIdentifier(name)} LIMIT 100;`);
-      runQuery();
+      if (type === 'table') {
+        editor.setValue(`SELECT * FROM ${quoteIdentifier(name)} LIMIT 100;`);
+        runQuery();
+      } else if (type === 'view') {
+        editor.setValue(`SELECT * FROM ${quoteIdentifier(name)} LIMIT 100;`);
+        runQuery();
+      } else {
+        inspectIndex(name);
+      }
     });
+    if (type === 'table') {
+      const inspectButton = document.createElement('button');
+      inspectButton.type = 'button';
+      inspectButton.className = 'object-inspect';
+      inspectButton.title = `Inspect ${name} structure`;
+      inspectButton.setAttribute('aria-label', `Inspect ${name} structure`);
+      inspectButton.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+      inspectButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        document.querySelectorAll('.object-item.active').forEach((node) => node.classList.remove('active'));
+        item.classList.add('active');
+        inspectTable(name);
+      });
+      item.appendChild(inspectButton);
+    }
     list.appendChild(item);
   });
+}
+
+
+function inspectTable(tableName) {
+  if (!db) return;
+  try {
+    const quoted = quoteIdentifier(tableName);
+    const columnResult = db.exec(`PRAGMA table_info(${quoted});`);
+    const foreignResult = db.exec(`PRAGMA foreign_key_list(${quoted});`);
+    const indexResult = db.exec(`PRAGMA index_list(${quoted});`);
+    const columns = columnResult[0] ? columnResult[0].values : [];
+    const foreignKeys = foreignResult[0] ? foreignResult[0].values : [];
+    const indexes = indexResult[0] ? indexResult[0].values : [];
+    renderSchemaInspector(tableName, columns, foreignKeys, indexes);
+    $('results-title').textContent = `Structure · ${tableName}`;
+    queryStatusElem.textContent = `${columns.length} columns · ${foreignKeys.length} foreign-key entries · ${indexes.length} indexes`;
+    setExportEnabled(false);
+    showMessage(`Inspecting table: ${tableName}`, 'success', true);
+  } catch (error) {
+    renderError(`Could not inspect table: ${error.message}`);
+    queryStatusElem.textContent = 'Schema inspection failed';
+    showMessage(error.message, 'error');
+  }
+}
+
+function inspectIndex(indexName) {
+  if (!db) return;
+  try {
+    const result = db.exec(`PRAGMA index_info(${quoteIdentifier(indexName)});`);
+    const rows = result[0] ? result[0].values : [];
+    const wrapper = document.createElement('div');
+    wrapper.className = 'schema-inspector';
+    const heading = document.createElement('div');
+    heading.className = 'schema-section-heading';
+    heading.textContent = `Index · ${indexName}`;
+    wrapper.appendChild(heading);
+    wrapper.appendChild(createSchemaTable(['SEQNO', 'CID', 'COLUMN'], rows.map((row) => [
+      row[0], row[1], row[2] === null ? '(expression)' : row[2]
+    ])));
+    resultsElem.replaceChildren(wrapper);
+    $('results-title').textContent = `Index · ${indexName}`;
+    queryStatusElem.textContent = `${rows.length} indexed column${rows.length === 1 ? '' : 's'}`;
+    setExportEnabled(false);
+  } catch (error) {
+    renderError(error.message);
+    queryStatusElem.textContent = 'Index inspection failed';
+  }
+}
+
+function renderSchemaInspector(tableName, columns, foreignKeys, indexes) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'schema-inspector';
+
+  const intro = document.createElement('div');
+  intro.className = 'schema-intro';
+  const title = document.createElement('strong');
+  title.textContent = tableName;
+  const subtitle = document.createElement('span');
+  subtitle.textContent = 'Table definition reported by SQLite';
+  intro.append(title, subtitle);
+  wrapper.appendChild(intro);
+
+  wrapper.appendChild(createSchemaSection('COLUMNS', columns.length, createSchemaTable(
+    ['#', 'COLUMN', 'TYPE', 'NOT NULL', 'DEFAULT', 'KEY'],
+    columns.map((column) => [
+      column[0],
+      column[1],
+      column[2] || '—',
+      column[3] ? 'YES' : 'NO',
+      column[4] === null ? '—' : column[4],
+      column[5] ? `PK ${column[5]}` : '—'
+    ])
+  )));
+
+  const fkRows = foreignKeys.map((fk) => [
+    fk[0], fk[1], fk[3], fk[2], fk[4] || '(primary key)', fk[5], fk[6]
+  ]);
+  wrapper.appendChild(createSchemaSection('FOREIGN KEYS', fkRows.length, fkRows.length
+    ? createSchemaTable(['ID', 'SEQ', 'FROM COLUMN', 'REFERENCES', 'TO COLUMN', 'ON UPDATE', 'ON DELETE'], fkRows)
+    : createSchemaEmpty('No foreign keys are declared for this table.')));
+
+  const indexRows = indexes.map((index) => {
+    const info = db.exec(`PRAGMA index_info(${quoteIdentifier(index[1])});`);
+    const names = info[0] ? info[0].values.map((row) => row[2] === null ? '(expression)' : row[2]) : [];
+    return [index[1], index[2] ? 'UNIQUE' : 'NO', index[3] || '—', index[4] ? 'PARTIAL' : 'NO', names.join(', ') || '—'];
+  });
+  wrapper.appendChild(createSchemaSection('INDEXES', indexRows.length, indexRows.length
+    ? createSchemaTable(['INDEX', 'UNIQUE', 'ORIGIN', 'PARTIAL', 'COLUMNS'], indexRows)
+    : createSchemaEmpty('No indexes are defined for this table.')));
+
+  const note = document.createElement('p');
+  note.className = 'schema-footnote';
+  note.textContent = 'Foreign keys shown here are declared constraints. Their presence does not guarantee that foreign-key enforcement is enabled or that existing rows satisfy them.';
+  wrapper.appendChild(note);
+  resultsElem.replaceChildren(wrapper);
+}
+
+function createSchemaSection(label, count, content) {
+  const section = document.createElement('section');
+  section.className = 'schema-section';
+  const heading = document.createElement('div');
+  heading.className = 'schema-section-heading';
+  const name = document.createElement('strong');
+  name.textContent = label;
+  const badge = document.createElement('span');
+  badge.textContent = count;
+  heading.append(name, badge);
+  section.append(heading, content);
+  return section;
+}
+
+function createSchemaTable(headers, rows) {
+  const scroll = document.createElement('div');
+  scroll.className = 'table-scroll';
+  const table = document.createElement('table');
+  table.className = 'data-table schema-table';
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  headers.forEach((label) => {
+    const th = document.createElement('th');
+    th.textContent = label;
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+  const tbody = document.createElement('tbody');
+  rows.forEach((row) => {
+    const tr = document.createElement('tr');
+    row.forEach((value) => {
+      const td = document.createElement('td');
+      td.textContent = value === null || value === undefined ? '—' : String(value);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.append(thead, tbody);
+  scroll.appendChild(table);
+  return scroll;
+}
+
+function createSchemaEmpty(message) {
+  const empty = document.createElement('p');
+  empty.className = 'schema-empty';
+  empty.textContent = message;
+  return empty;
 }
 
 function runQuery(queryOverride) {
